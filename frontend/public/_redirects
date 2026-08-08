@@ -1,0 +1,5 @@
+/*
+ Netlify SPA fallback: every route serves index.html.
+ Copied from frontend/public into frontend/dist by `vite build`.
+*/
+/*    /index.html   200

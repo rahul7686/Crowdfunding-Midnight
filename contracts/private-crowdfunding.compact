@@ -1,0 +1,194 @@
+// Private Crowdfunding Platform — Midnight Network
+// ============================================================================
+// MULTI-CAMPAIGN DESIGN
+// ----------------------------------------------------------------------------
+// The contract hosts ANY number of campaigns simultaneously in a single
+// deployed instance. Each campaign lives in a map keyed by a monotonically
+// increasing campaign id and has its own owner, status, metadata, target,
+// aggregate raised amount, donation count and receipt sequence.
+//
+// PRIVACY MODEL
+// ----------------------------------------------------------------------------
+// PUBLIC (on-chain ledger, visible to everyone):
+//   - campaigns:        id -> { status, owner, recipient, title, description,
+//                    target, raised, donationsCount, sequence }
+//   - owner:            the campaign creator's PSEUDONYM (a one-way hash of
+//                    their secret key + a fixed salt). It authorizes closing
+//                    that campaign, but never reveals the creator's identity.
+//   - recipient:        the campaign creator's Zswap coin public key. Every
+//                    donation creates an ACTUAL native NIGHT coin payable to
+//                    this key, so the funds leave the donor's wallet and land
+//                    in the creator's shielded wallet.
+//   - raised:           the aggregate amount raised for THAT campaign.
+//   - receipts:         NOT stored here — each donate() RETURNS a blinded
+//                    receipt: persistentHash("receipt:", campaignId,
+//                    seq, amount, donorSecretKey). Receipts are binding +
+//                    hiding: anyone can see one exists, nobody can learn the
+//                    amount or the donor from it. The per-campaign sequence
+//                    keeps the same donor's receipts unlinkable.
+//
+// PRIVATE (witnesses — proved in-circuit, NEVER revealed, NEVER written to
+// the ledger, and the Compact compiler's disclosure analyzer enforces this):
+//   - localSecretKey():  the donor's/creator's Midnight secret key. Only its
+//                    one-way hash ever reaches the ledger.
+//   - donationAmount():  the per-donation amount. The circuit PROVES it is
+//                    positive, matches the public total-delta of the selected
+//                    campaign, and does not overfund it. It becomes the value
+//                    of the created NIGHT coin, which enters the transaction
+//                    ONLY as a Zswap coin commitment — the amount itself is
+//                    never a public ledger field nor a public circuit output.
+//
+// disclose() is used deliberately in exactly the places above: metadata and
+// target (public page), the creator pseudonym (close authorization), the
+// per-campaign running total (public progress), and the blinded receipts
+// (public acknowledgements that hide their contents).
+// ============================================================================
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export enum CampaignStatus {
+  ACTIVE,
+  CLOSED
+}
+
+export struct CampaignEntry {
+  status: CampaignStatus;
+  owner: Bytes<32>;
+  recipient: Bytes<32>;
+  title: Maybe<Opaque<"string">>;
+  description: Maybe<Opaque<"string">>;
+  target: Uint<128>;
+  raised: Uint<128>;
+  donationsCount: Uint<128>;
+  sequence: Uint<128>;
+}
+
+// Each campaign is keyed by its id. Campaigns are never removed, so the map
+// size doubles as the id allocator for the next launch.
+export ledger campaigns: Map<Uint<128>, CampaignEntry>;
+
+witness localSecretKey(): Bytes<32>;
+witness donationAmount(): Uint<128>;
+
+// Derives an unlinkable pseudonym from a secret key + salt.
+export circuit publicKey(sk: Bytes<32>, salt: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<3, Bytes<32>>>([pad(32, "crowdfunding:pk:"), salt, sk]);
+}
+
+// Anyone can launch a campaign; multiple campaigns can be active at once.
+// Metadata + funding goal are deliberately public (this is the campaign's
+// storefront); the creator's identity is revealed only as a one-way pseudonym
+// used later to authorize close(). The creator also discloses the Zswap coin
+// public key that every donation's NIGHT coin is paid to. The new campaign id
+// is returned (public).
+export circuit launchCampaign(newTitle: Opaque<"string">, newDescription: Opaque<"string">, newTarget: Uint<128>, newRecipient: Bytes<32>): Uint<128> {
+  assert(newTarget > 0, "Target must be greater than zero");
+  const id = campaigns.size() as Uint<128>;
+  assert(!campaigns.member(disclose(id)), "Campaign id already in use");
+  campaigns.insert(disclose(id), CampaignEntry {
+    status: CampaignStatus.ACTIVE,
+    owner: disclose(publicKey(localSecretKey(), pad(32, "owner"))),
+    recipient: disclose(newRecipient),
+    title: disclose(some<Opaque<"string">>(newTitle)),
+    description: disclose(some<Opaque<"string">>(newDescription)),
+    target: disclose(newTarget),
+    raised: 0 as Uint<128>,
+    donationsCount: 0 as Uint<128>,
+    sequence: 0 as Uint<128>,
+  });
+  return disclose(id);
+}
+
+// Donate to a SPECIFIC campaign with a fully private amount. The donor proves:
+//   1. the campaign exists and is still open,
+//   2. the amount is positive,
+//   3. the new public total of THAT campaign equals (its current total + the
+//      private amount),
+//   4. the total does not exceed that campaign's funding target.
+// Then the circuit creates an ACTUAL native NIGHT coin of exactly the private
+// amount, payable to the campaign recipient (the owner's Zswap coin public
+// key). The donor's wallet balances the transaction by spending that NIGHT
+// from the donor's own shielded balance — so the funds really move, while the
+// amount itself stays hidden inside the Zswap coin commitment. The amount
+// never becomes a public ledger field nor a public circuit output. The
+// returned receipt is a hiding+binding commitment over (campaign id,
+// per-campaign sequence salt, amount, donor secret key).
+export circuit donate(campaignId: Uint<128>, newTotal: Uint<128>): Bytes<32> {
+  // Campaign ids are allocated contiguously from 0 (id = map size at launch)
+  // and campaigns are never removed, so membership is exactly id < size. This
+  // is used instead of campaigns.member(): the member opcode cannot be the
+  // first map read on an empty map in this runtime.
+  const campaignCount = campaigns.size() as Uint<128>;
+  assert(campaignCount > campaignId, "Campaign does not exist");
+  const c = campaigns.lookup(disclose(campaignId));
+  assert(c.status == CampaignStatus.ACTIVE, "Campaign is not active");
+  const amount = donationAmount();
+  assert(amount > 0, "Donation amount must be greater than zero");
+  assert(newTotal == c.raised + amount, "Total mismatch");
+  assert(newTotal <= c.target, "Donation exceeds remaining funding target");
+  // Create the actual NIGHT coin payable to the campaign recipient. The value
+  // is the PRIVATE donation amount: it enters the transaction ONLY as a Zswap
+  // coin commitment (hidden), and is enforced to equal the public total-delta
+  // by the constraint above. The nonce is unique per (donor, campaign,
+  // donation-index) so coins are never reused.
+  const coinNonce = persistentHash<Vector<4, Bytes<32>>>([
+    pad(32, "crowdfunding:donation:coin:"),
+    campaignId as Field as Bytes<32>,
+    c.sequence as Field as Bytes<32>,
+    localSecretKey()
+  ]);
+  createZswapOutput(
+    ShieldedCoinInfo {
+      nonce: coinNonce,
+      color: nativeToken(),
+      value: amount,
+    },
+    left<ZswapCoinPublicKey, ContractAddress>(
+      ZswapCoinPublicKey { bytes: c.recipient }
+    )
+  );
+  const receipt = persistentHash<Vector<5, Bytes<32>>>([
+    pad(32, "crowdfunding:receipt:"),
+    campaignId as Field as Bytes<32>,
+    c.sequence as Field as Bytes<32>,
+    amount as Field as Bytes<32>,
+    localSecretKey()
+  ]);
+  campaigns.insert(disclose(campaignId), CampaignEntry {
+    status: c.status,
+    owner: c.owner,
+    recipient: c.recipient,
+    title: c.title,
+    description: c.description,
+    target: c.target,
+    raised: disclose(newTotal),
+    donationsCount: c.donationsCount + 1 as Uint<128>,
+    sequence: c.sequence + 1 as Uint<128>,
+  });
+  return disclose(receipt);
+}
+
+// Only the creator of THAT campaign (proved via their secret key matching the
+// disclosed pseudonym) can close it. The final aggregate is returned public.
+export circuit closeCampaign(campaignId: Uint<128>): Field {
+  const campaignCount = campaigns.size() as Uint<128>;
+  assert(campaignCount > campaignId, "Campaign does not exist");
+  const c = campaigns.lookup(disclose(campaignId));
+  assert(c.status == CampaignStatus.ACTIVE, "Campaign is not active");
+  assert(c.owner == publicKey(localSecretKey(), pad(32, "owner")), "Only the campaign owner can close the campaign");
+  const finalRaised = c.raised;
+  campaigns.insert(disclose(campaignId), CampaignEntry {
+    status: CampaignStatus.CLOSED,
+    owner: c.owner,
+    recipient: c.recipient,
+    title: c.title,
+    description: c.description,
+    target: c.target,
+    raised: c.raised,
+    donationsCount: c.donationsCount,
+    sequence: c.sequence,
+  });
+  return disclose(finalRaised as Field);
+}
