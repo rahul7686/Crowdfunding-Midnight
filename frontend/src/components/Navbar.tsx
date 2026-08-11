@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 
 import { WalletDropdown } from "./WalletDropdown";
+import {
+  registerConnectingListener,
+  requestWalletConnect,
+  unregisterConnectingListener,
+} from "../utils/connectionController";
 import { CloseIcon, LogoShield, MenuIcon, WalletIcon } from "./icons";
 
 interface NavbarProps {
@@ -21,12 +26,20 @@ const NAV_LINKS = [
 export function Navbar({ connected, networkId, address, onDisconnect }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [connecting, setConnecting] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Mirror the wallet's connecting state (owned by WalletConnect/useMidnight)
+  // so the button can show progress and avoid double clicks.
+  useEffect(() => {
+    registerConnectingListener(setConnecting);
+    return () => unregisterConnectingListener();
   }, []);
 
   const networkLabel =
@@ -73,10 +86,18 @@ export function Navbar({ connected, networkId, address, onDisconnect }: NavbarPr
               onDisconnect={onDisconnect}
             />
           ) : (
-            <a className="btn btn-primary btn-connect" href="#campaign">
+            <button
+              type="button"
+              className="btn btn-primary btn-connect"
+              onClick={() => {
+                setMenuOpen(false);
+                requestWalletConnect();
+              }}
+              disabled={connecting}
+            >
               <WalletIcon />
-              <span>Connect Wallet</span>
-            </a>
+              <span>{connecting ? "Connecting…" : "Connect Wallet"}</span>
+            </button>
           )}
 
           <button

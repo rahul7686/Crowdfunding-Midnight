@@ -40,6 +40,7 @@ import { ConfirmModal } from "./ConfirmModal";
 import { DonationModal } from "./DonationModal";
 import { LaunchModal } from "./LaunchModal";
 import { useToast } from "./Toast";
+import { CampaignDropdown } from "./CampaignDropdown";
 import { RocketIcon, UserIcon } from "./icons";
 import { TransactionReceipt, type TxReceiptData } from "./TransactionReceipt";
 import { pureCircuits } from "../contracts/index.js";
@@ -542,27 +543,23 @@ export function Campaign({
 
       {campaigns.length > 0 && (
         <div className="campaign-picker">
-          <label className="campaign-picker-label" htmlFor="campaign-select">
+          <label className="campaign-picker-label" id="campaign-picker-label">
             Selected campaign
           </label>
-          <select
-            id="campaign-select"
-            className="campaign-picker-select"
-            value={selectedId !== null ? selectedId.toString() : ""}
+          <CampaignDropdown
+            options={campaigns.map((c) => ({
+              id: c.id,
+              status: c.status,
+              title: c.title,
+            }))}
+            value={selectedId}
+            labelId="campaign-picker-label"
             disabled={busy !== null}
-            onChange={(event) => {
-              const next = event.target.value ? BigInt(event.target.value) : null;
+            onChange={(next) => {
               setSelectedId(next);
               setActionError(null);
             }}
-          >
-            {campaigns.map((c) => (
-              <option key={c.id.toString()} value={c.id.toString()}>
-                #{c.id.toString()} — {c.title ?? "(untitled)"} (
-                {c.status === CampaignStatus.ACTIVE ? "ACTIVE" : "CLOSED"})
-              </option>
-            ))}
-          </select>
+          />
         </div>
       )}
 

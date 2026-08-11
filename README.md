@@ -122,6 +122,22 @@ The suite exercises launch/donate/close lifecycle, privacy invariants (receipts
 never reveal amounts), over-funding rejection, owner-only close, multi-round
 donations and native NIGHT coin minting to recipients.
 
+## Testing private donations on Preview
+
+On the Midnight Preview network, private (shielded) donations require a shielded
+NIGHT coin in the donating wallet. There is currently no way to obtain one there:
+
+- The Preview faucet provides tNIGHT only to **unshielded** addresses.
+- The current 1AM / DApp Connector flow provides no unshielded-to-shielded
+  conversion.
+- Private donations pay a real shielded NIGHT coin to the campaign owner, so the
+  donor must already hold shielded NIGHT.
+
+For testing private donations on Preview, the wallet must therefore receive
+shielded NIGHT from an existing shielded holder (e.g. a shielded transfer to the
+wallet's `mn_shield-addr_preview1...` address). This is a Preview-network
+limitation, not a bug in the crowdfunding contract.
+
 ## Security notes
 
 - Never commit `.midnight-state.json` (contains the wallet seed), `.midnight-wallet-state/`, `midnight-level-db/` or any `.env.local`.

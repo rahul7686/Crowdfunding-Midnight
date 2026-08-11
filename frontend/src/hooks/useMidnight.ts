@@ -12,8 +12,13 @@
  * all key material inside the wallet extension.
  */
 
-import { useCallback, useEffect, useState } from "react";
-import { type ConnectedAPI, type InitialAPI } from "@midnight-ntwrk/dapp-connector-api";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  type APIError,
+  type ConnectedAPI,
+  type InitialAPI,
+  ErrorCodes,
+} from "@midnight-ntwrk/dapp-connector-api";
 
 import { NETWORK_ID } from "../providers";
 
@@ -45,6 +50,13 @@ const apiMajor = (apiVersion: string): number =>
 const isCompatibleWallet = (w: InitialAPI): boolean =>
   Number.isFinite(apiMajor(w.apiVersion)) && apiMajor(w.apiVersion) >= API_MAJOR_MIN;
 
+const isAPIError = (err: unknown): err is APIError =>
+  typeof err === "object" && err !== null && (err as APIError).type === "DAppConnectorAPIError";
+
+/** Friendly message for when the user declines or cancels the wallet popup. */
+export const CONNECT_REJECTED_MESSAGE =
+  "The wallet connection request was declined or cancelled. You can try again anytime.";
+
 export const discoverWallets = (): InitialAPI[] => {
   if (typeof window === "undefined" || !window.midnight) return [];
   return Object.values(window.midnight).filter(isCompatibleWallet);
@@ -62,12 +74,20 @@ export function useMidnight(): MidnightConnection {
   const [networkId, setNetworkIdState] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Tracks whether a connection is active so `connect` can refuse to silently
+  // re-establish one (it must always go through the user's explicit approval).
+  const connectedRef = useRef(false);
+
   useEffect(() => {
     // Wallets inject asynchronously after extension load — re-scan on mount.
     setWallets(discoverWallets());
   }, []);
 
   const connect = useCallback(async () => {
+    // Never silently re-connect: a connection is only established in response
+    // to an explicit user gesture that approves the wallet authorization popup.
+    if (connectedRef.current) return;
+
     setStatus({ status: "connecting" });
     setError(null);
     try {
@@ -82,6 +102,10 @@ export function useMidnight(): MidnightConnection {
       const selected = available[0];
       setWallet(selected);
 
+      // This is the explicit wallet authorization request: it opens the 1AM
+      // wallet popup where the user approves or rejects the connection. The
+      // DApp only reports "connected" after this promise resolves and the
+      // connection is validated below.
       const api = await selected.connect(NETWORK_ID);
 
       const connection = await api.getConnectionStatus();
@@ -105,20 +129,30 @@ export function useMidnight(): MidnightConnection {
 
       const { unshieldedAddress } = await api.getUnshieldedAddress();
 
+      connectedRef.current = true;
       setConnectedApi(api);
       setUnshieldedAddress(unshieldedAddress);
       setNetworkIdState(config.networkId ?? NETWORK_ID);
       setStatus({ status: "connected" });
     } catch (err) {
+      connectedRef.current = false;
       setConnectedApi(null);
       setUnshieldedAddress(null);
       setNetworkIdState(null);
       setStatus({ status: "error" });
-      setError(err instanceof Error ? err.message : "Could not connect to the wallet.");
+      setError(
+        isAPIError(err) &&
+          (err.code === ErrorCodes.Rejected || err.code === ErrorCodes.PermissionRejected)
+          ? CONNECT_REJECTED_MESSAGE
+          : err instanceof Error
+            ? err.message
+            : "Could not connect to the wallet.",
+      );
     }
   }, []);
 
   const disconnect = useCallback(() => {
+    connectedRef.current = false;
     setWallet(null);
     setConnectedApi(null);
     setUnshieldedAddress(null);
