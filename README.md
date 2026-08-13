@@ -194,6 +194,22 @@ The suite exercises launch/donate/close lifecycle, privacy invariants (receipts
 never reveal amounts), over-funding rejection, owner-only close, multi-round
 donations and native NIGHT coin minting to recipients.
 
+## CI/CD
+
+GitHub Actions runs validation on every `push` and `pull_request` (see
+`.github/workflows/`):
+
+- **Smart Contract CI** (`smart-contract-ci.yml`) — installs the Compact
+  toolchain (devtools 0.5.1, compiler 0.31.1), compiles
+  `contracts/private-crowdfunding.compact`, runs the Vitest contract suite and
+  the TypeScript typecheck. It validates the contract but never deploys it.
+- **Frontend CI** (`frontend-ci.yml`) — installs frontend dependencies, compiles
+  the contract (the build consumes its artifacts), runs `oxlint` and the Vite
+  production build.
+
+CI does not deploy to Preprod and never has access to any wallet seed or
+private key. Both workflows use Node.js 22 with npm dependency caching.
+
 ## Testing private donations on Preview
 
 On the Midnight Preview network, private (shielded) donations require a shielded

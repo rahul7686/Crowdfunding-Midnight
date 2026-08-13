@@ -1,0 +1,43 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Lint + production build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22 (frontend dependency cache)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci --prefix frontend
+
+      - name: Install Compact toolchain (devtools 0.5.1, compiler 0.31.1)
+        run: |
+          curl --proto '=https' --tlsv1.2 -LsSf \
+            https://github.com/midnightntwrk/compact/releases/download/compact-v0.5.1/compact-installer.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          compact update 0.31.1
+
+      - name: Compile the Compact smart contract (feeds frontend artifacts)
+        run: npm run compile
+
+      - name: Lint
+        run: npm --prefix frontend run lint
+
+      - name: Production build (tsc -b + vite build)
+        run: npm --prefix frontend run build

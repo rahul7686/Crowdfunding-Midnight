@@ -1,0 +1,43 @@
+name: Smart Contract CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: Compile + test + typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22 (dependency cache)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Compact toolchain (devtools 0.5.1, compiler 0.31.1)
+        run: |
+          curl --proto '=https' --tlsv1.2 -LsSf \
+            https://github.com/midnightntwrk/compact/releases/download/compact-v0.5.1/compact-installer.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          compact update 0.31.1
+
+      - name: Compile the Compact smart contract
+        run: npm run compile
+
+      - name: Run contract test suite
+        run: npm test
+
+      - name: Typecheck (src + tests)
+        run: npm run typecheck
