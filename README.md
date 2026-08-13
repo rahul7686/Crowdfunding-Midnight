@@ -18,6 +18,28 @@ the ledger.
   same donor's receipts are unlinkable.
 - **Only the creator** (proved via a disclosed pseudonym) can close a campaign.
 
+## Tech Stack
+
+- **Midnight Network** — the platform runs on Midnight, with the contract
+  deployed to the Preprod network (see [Smart Contract Deployment](#smart-contract-deployment)).
+- **Compact smart contract language** — the crowdfunding contract is written in
+  Compact (`contracts/private-crowdfunding.compact`) and compiled with the
+  Midnight `compact` compiler CLI.
+- **React + TypeScript** — the browser DApp (`frontend/`) is built with React 19
+  and TypeScript, bundled with **Vite**.
+- **Midnight DApp Connector / 1AM wallet** — the DApp connects to the Midnight
+  **1AM** wallet through the `window.midnight` DApp Connector API for proving,
+  balancing and submitting circuit calls.
+- **Midnight JS SDK** — `midnight-js-contracts` and the provider packages
+  (public-data, level-private-state, proof-provider, network-id) drive contract
+  deployment, state access and transaction submission.
+- **Node.js** — the CLI, deployment tooling and tests run on Node.js >= 22
+  (via `tsx`).
+- **Vitest** — the contract test suite (`tests/`) runs against an in-memory
+  circuit runtime.
+- **Docker** — `compose.yml` runs a local devnet (node, indexer, proof server)
+  for local development.
+
 ## Smart Contract Deployment
 
 ### Deployed network
@@ -43,13 +65,12 @@ DApp connects to this exact instance via `findDeployedContract` and submits the
 
 ### Deployment screenshot
 
-> **TODO (submission):** drop a genuine screenshot of the saved Preprod
-> deployment state at `./screenshots/deployment-preprod.png` — e.g. the
-> `deployments.preprod` entry in `.midnight-state.json` (contract address
-> `af62db5df9d90739650768e7145396aff0f0945b0a7fbbff5901b81abc0b7a19`) or the
-> contract listed on the Preprod explorer. The `screenshots/` directory is
-> committed so the proof is part of the repository. Do not commit any wallet
-> seed, mnemonic or `.env.local` file.
+![Preprod deployment state](./screenshots/deployment-preprod.png)
+
+The screenshot shows the saved Preprod deployment state: the `deployments.preprod`
+entry in `.midnight-state.json` with the contract address
+`af62db5df9d90739650768e7145396aff0f0945b0a7fbbff5901b81abc0b7a19`. The
+`screenshots/` directory is committed so the proof is part of the repository.
 
 No seed or mnemonic is committed anywhere in this repository (see Security notes).
 
@@ -152,16 +173,15 @@ links the confirmed transaction in the Midnight explorer.
 
 ## Demo video
 
-> **TODO (submission):** paste the demo video URL here (e.g. an unlisted YouTube
-> or Loom link) showing:
+[Watch the demo video on YouTube](https://youtu.be/uaJt2fKiHKU)
+
+The video shows:
 
 1. **Wallet connect** — clicking *Connect Wallet* in the navbar, approving the
    1AM wallet popup, and seeing the connected wallet profile.
 2. **Successful circuit call** — launching a campaign (or donating a private
    amount), with the `launchCampaign` transaction confirmed on-chain and the
    Midnight explorer receipt shown.
-
-Video link: `TODO — paste your demo video URL here`
 
 ## Tests
 
