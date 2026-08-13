@@ -31,6 +31,7 @@ import {
   buildProviders,
   NETWORK_ID,
   PRIVATE_STATE_ID,
+  waitForCanonicalState,
   type Providers,
 } from "../providers";
 import type { CampaignStats } from "../types";
@@ -90,6 +91,7 @@ export function Campaign({
   const [busy, setBusy] = useState<null | "launch" | "donate" | "close">(null);
   const [txReceipt, setTxReceipt] = useState<TxReceipt | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [syncNote, setSyncNote] = useState<string | null>(null);
   const [loadingState, setLoadingState] = useState(false);
 
   // Launch form
@@ -295,6 +297,7 @@ export function Campaign({
     event.preventDefault();
     setActionError(null);
     setTxReceipt(null);
+    setSyncNote(null);
     const ctx = requireContract();
     if (!ctx) return;
     const { prov, contract } = ctx;
@@ -307,6 +310,11 @@ export function Campaign({
 
     setBusy("launch");
     try {
+      // Wait for the indexer to agree with the node's canonical chain before
+      // building the proof: proofs built on a lagging/forked indexer are
+      // rejected by the network (custom errors 115 / 170).
+      await waitForCanonicalState({ onStatus: setSyncNote });
+      setSyncNote(null);
       const recipientBytes = walletCoinPublicKeyRef.current;
       if (!recipientBytes) {
         setActionError(
@@ -339,6 +347,7 @@ export function Campaign({
       setActionError(message);
       toast.error("Launch failed", message);
     } finally {
+      setSyncNote(null);
       setBusy(null);
     }
   };
@@ -347,6 +356,7 @@ export function Campaign({
     setActionError(null);
     setTxReceipt(null);
     setDonationError(null);
+    setSyncNote(null);
     const ctx = requireContract();
     if (!ctx) return;
     const { prov, contract } = ctx;
@@ -364,6 +374,10 @@ export function Campaign({
     setDonationStage(1);
     setBusy("donate");
     try {
+      // Wait for the indexer to agree with the node's canonical chain so the
+      // proof is built against state the network will accept.
+      await waitForCanonicalState({ onStatus: setSyncNote });
+      setSyncNote(null);
       // Re-read the selected campaign's aggregate fresh from the indexer so the
       // proof constraint (newTotal == raised + amount) is built against current
       // state.
@@ -434,6 +448,7 @@ export function Campaign({
       } catch {
         // non-fatal
       }
+      setSyncNote(null);
       setBusy(null);
     }
   };
@@ -441,6 +456,7 @@ export function Campaign({
   const handleClose = async () => {
     setActionError(null);
     setTxReceipt(null);
+    setSyncNote(null);
     const ctx = requireContract();
     if (!ctx) return;
     const { prov, contract } = ctx;
@@ -448,6 +464,8 @@ export function Campaign({
 
     setBusy("close");
     try {
+      await waitForCanonicalState({ onStatus: setSyncNote });
+      setSyncNote(null);
       const result = await contract.callTx.closeCampaign(selectedId);
       setTxReceipt({
         kind: "close",
@@ -463,6 +481,7 @@ export function Campaign({
       setActionError(message);
       toast.error("Close failed", message);
     } finally {
+      setSyncNote(null);
       setBusy(null);
     }
   };
@@ -540,6 +559,8 @@ export function Campaign({
       </div>
 
       {actionError && <p className="error-text">{actionError}</p>}
+
+      {syncNote && <p className="muted">{syncNote}</p>}
 
       {campaigns.length > 0 && (
         <div className="campaign-picker">

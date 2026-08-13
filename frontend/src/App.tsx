@@ -86,7 +86,7 @@ function App() {
               </div>
               <h3 className="placeholder-title">Connect your wallet to get started</h3>
               <p className="muted placeholder-text">
-                Once connected on the <strong className="placeholder-strong">preview</strong>{" "}
+                Once connected on the <strong className="placeholder-strong">preprod</strong>{" "}
                 network you can launch a campaign, donate with a private amount, or close a
                 campaign you own.
               </p>

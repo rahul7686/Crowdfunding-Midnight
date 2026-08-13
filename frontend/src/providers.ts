@@ -40,6 +40,152 @@ export const PRIVATE_STATE_ID = "crowdfundingPrivateState";
 export const PRIVATE_STATE_PASSWORD =
   "Crowdfunding-DApp-Preview-Bootcamp-2026";
 
+// --- Chain-tip freshness gate ----------------------------------------------
+//
+// Every transaction is built from state served by the public indexer (see
+// `publicDataProvider` below). If the indexer is behind the chain tip — or is
+// briefly serving a fork during a re-org — the node rejects the transaction's
+// proofs (InvalidProof = custom 115, InvalidDustSpendProof = custom 170), and
+// repeated byte-identical resubmissions get the transaction banned by the
+// pool. Before building a transaction we therefore wait until the indexer has
+// caught up to (and agrees with) the node's canonical chain.
+
+const DEFAULT_NODE_RPC =
+  NETWORK_ID === "preprod"
+    ? "https://rpc.preprod.midnight.network"
+    : "https://rpc.preview.midnight.network";
+
+export const NODE_RPC_URL = import.meta.env.VITE_NODE_RPC_URL ?? DEFAULT_NODE_RPC;
+
+export interface ChainTip {
+  height: number;
+  hash: string;
+}
+
+export interface WaitForCanonicalStateOptions {
+  /** How long to keep polling before giving up, in ms. */
+  timeoutMs?: number;
+  /** Delay between polls, in ms. */
+  intervalMs?: number;
+  /** How many blocks behind the tip counts as "caught up". */
+  tolerance?: number;
+  /** Called with a human-readable status while waiting. */
+  onStatus?: (status: string) => void;
+}
+
+async function rpcNode(method: string, params: unknown[]): Promise<unknown> {
+  const res = await fetch(NODE_RPC_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+  });
+  if (!res.ok) {
+    throw new Error(`Node RPC error (HTTP ${res.status})`);
+  }
+  const json = (await res.json()) as { result?: unknown; error?: { message?: string } };
+  if (json.error) {
+    throw new Error(`Node RPC error: ${json.error.message ?? "unknown"}`);
+  }
+  return json.result;
+}
+
+async function queryIndexerBlockAt(height: number): Promise<ChainTip | null> {
+  try {
+    const res = await fetch(INDEXER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: "query($offset: BlockOffset) { block(offset: $offset) { height hash } }",
+        variables: { offset: { height } },
+      }),
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as {
+      data?: { block?: { height: number; hash: string } | null };
+    };
+    const block = json.data?.block;
+    return block ? { height: block.height, hash: block.hash } : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getNodeTip(): Promise<ChainTip> {
+  const [header, hash] = (await Promise.all([
+    rpcNode("chain_getHeader", []),
+    rpcNode("chain_getBlockHash", []),
+  ])) as [{ number: string }, string];
+  return { height: Number(header.number), hash: String(hash) };
+}
+
+/**
+ * Waits until the indexer has caught up to the node's canonical chain tip
+ * (within `tolerance` blocks) so transactions are built against a state the
+ * network will accept. Throws with a clear message if it never converges.
+ */
+export async function waitForCanonicalState(
+  options: WaitForCanonicalStateOptions = {},
+): Promise<void> {
+  const { timeoutMs = 180_000, intervalMs = 5_000, tolerance = 24 } = options;
+  const onStatus = options.onStatus;
+  const startedAt = Date.now();
+  let lastReported = "";
+
+  const report = (message: string) => {
+    if (message !== lastReported) {
+      lastReported = message;
+      onStatus?.(message);
+    }
+  };
+
+  for (;;) {
+    if (Date.now() - startedAt > timeoutMs) {
+      throw new Error(
+        `The ${NETWORK_ID} indexer is still behind the chain tip after ` +
+          `${Math.round(timeoutMs / 1000)}s. Transactions built on a lagging ` +
+          "indexer are rejected by the network (custom errors 115 / 170). " +
+          "Wait a few minutes and try again, or check https://status.shielded.tools/preprod.",
+      );
+    }
+
+    let tip: ChainTip;
+    try {
+      tip = await getNodeTip();
+    } catch {
+      report(`Checking the ${NETWORK_ID} node connection…`);
+      await new Promise((r) => setTimeout(r, intervalMs));
+      continue;
+    }
+
+    // The indexer must have the SAME block as the node at (tip - tolerance):
+    // this proves it is close to the tip AND on the same canonical chain, not
+    // a lagging or forked view.
+    const referenceHeight = tip.height - tolerance;
+    let nodeReferenceHash: string;
+    try {
+      nodeReferenceHash = String(
+        await rpcNode("chain_getBlockHash", [`0x${referenceHeight.toString(16)}`]),
+      ).replace(/^0x/, "");
+    } catch {
+      report(`Checking the ${NETWORK_ID} node connection…`);
+      await new Promise((r) => setTimeout(r, intervalMs));
+      continue;
+    }
+
+    const reference = await queryIndexerBlockAt(referenceHeight);
+    if (reference !== null && reference.hash === nodeReferenceHash) {
+      report("");
+      return;
+    }
+
+    report(
+      `Waiting for the ${NETWORK_ID} indexer to catch up to the chain tip ` +
+        `(more than ${tolerance} blocks behind)…`,
+    );
+    await new Promise((r) => setTimeout(r, intervalMs));
+  }
+}
+
 // Circuit names in the compiled contract — used to type the ZK config provider.
 export type CircuitKeys = "launchCampaign" | "donate" | "closeCampaign";
 

@@ -18,6 +18,41 @@ the ledger.
   same donor's receipts are unlinkable.
 - **Only the creator** (proved via a disclosed pseudonym) can close a campaign.
 
+## Smart Contract Deployment
+
+### Deployed network
+
+The DApp is deployed to the **Midnight Preprod** network (set via
+`VITE_NETWORK=preprod` in `frontend/.env.local` and recorded as
+`activeNetwork: "preprod"` in `.midnight-state.json`).
+
+### Deployed contract address
+
+| Field | Value |
+| --- | --- |
+| Network | Preprod |
+| Contract address | `af62db5df9d90739650768e7145396aff0f0945b0a7fbbff5901b81abc0b7a19` |
+| Deployed on | August 9, 2026 |
+| Explorer | [view on the Midnight explorer](https://explorer.midnight.network/contracts/af62db5df9d90739650768e7145396aff0f0945b0a7fbbff5901b81abc0b7a19) |
+
+This is the address configured in `frontend/.env.local`
+(`VITE_CONTRACT_ADDRESS=af62db5df9d90739650768e7145396aff0f0945b0a7fbbff5901b81abc0b7a19`)
+and recorded in `.midnight-state.json` under `deployments.preprod`. The browser
+DApp connects to this exact instance via `findDeployedContract` and submits the
+`launchCampaign` / `donate` / `closeCampaign` circuit calls against it.
+
+### Deployment screenshot
+
+> **TODO (submission):** drop a genuine screenshot of the saved Preprod
+> deployment state at `./screenshots/deployment-preprod.png` — e.g. the
+> `deployments.preprod` entry in `.midnight-state.json` (contract address
+> `af62db5df9d90739650768e7145396aff0f0945b0a7fbbff5901b81abc0b7a19`) or the
+> contract listed on the Preprod explorer. The `screenshots/` directory is
+> committed so the proof is part of the repository. Do not commit any wallet
+> seed, mnemonic or `.env.local` file.
+
+No seed or mnemonic is committed anywhere in this repository (see Security notes).
+
 ## Amounts: NIGHT has 6 decimal places
 
 Midnight's native token is **NIGHT**, whose smallest unit is **STAR**:
@@ -46,6 +81,7 @@ base units.
 ├── tests/                                   # Vitest suite against the circuit runtime
 ├── frontend/                                # React + TypeScript + Vite DApp
 │   └── src/format.ts                        # 6-decimal NIGHT format/parse helpers
+├── screenshots/                             # Deployment proof (deployment-preprod.png)
 ├── compose.yml                              # Local devnet (node, indexer, proof server)
 └── .midnight-state.json                     # LOCAL ONLY — wallet seed + deployments
 ```
@@ -107,9 +143,25 @@ npm run frontend:build     # typecheck + production build
 npm run frontend:preview   # preview the production build
 ```
 
-The browser DApp reads campaign state from the indexer, connects through the
-Midnight wallet connector, and submits private donations via the dApp-connector
-proof provider.
+The browser DApp connects to the Midnight **1AM** wallet (via the
+`window.midnight` DApp Connector API, see `frontend/src/hooks/useMidnight.ts`),
+reads campaign state from the indexer, and submits **circuit calls**
+(`launchCampaign` / `donate` / `closeCampaign`) through the dApp-connector proof
+provider. A successful circuit call returns a transaction, and the receipt view
+links the confirmed transaction in the Midnight explorer.
+
+## Demo video
+
+> **TODO (submission):** paste the demo video URL here (e.g. an unlisted YouTube
+> or Loom link) showing:
+
+1. **Wallet connect** — clicking *Connect Wallet* in the navbar, approving the
+   1AM wallet popup, and seeing the connected wallet profile.
+2. **Successful circuit call** — launching a campaign (or donating a private
+   amount), with the `launchCampaign` transaction confirmed on-chain and the
+   Midnight explorer receipt shown.
+
+Video link: `TODO — paste your demo video URL here`
 
 ## Tests
 

@@ -1,3 +1,4 @@
+import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
@@ -19,6 +20,13 @@ export default defineConfig({
       // Node builtins, so map them to their npm polyfills.
       events: 'events',
       buffer: 'buffer',
+      // `cross-fetch`'s browser build exports the native `window.fetch` unbound,
+      // which breaks when the Midnight SDK calls it through Apollo's HttpLink
+      // (`this` is undefined -> Chrome throws a fetch TypeError). Shim it with a
+      // `window`-bound fetch so indexer GraphQL queries work in the browser.
+      // Absolute path: the dep optimizer resolves aliases relative to the
+      // importing module, so a root-relative URL breaks inside node_modules.
+      'cross-fetch': fileURLToPath(new URL('./src/vendor/cross-fetch.ts', import.meta.url)),
     },
   },
   optimizeDeps: {

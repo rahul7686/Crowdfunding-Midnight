@@ -9,6 +9,21 @@ export type ErrorContext = "connect" | "launch" | "donate" | "close" | "generic"
 
 const PATTERNS: Array<{ test: RegExp; message: string }> = [
   {
+    test: /custom error: 115|invalid proof|proof.*(invalid|rejected|reject)/i,
+    message:
+      "The network rejected the transaction's proof (custom error 115). This usually means the indexer was behind or out of sync with the chain when the proof was built. Please try again now — the app waits for the indexer to catch up before submitting.",
+  },
+  {
+    test: /custom error: 170|invalid dust|dust spend/i,
+    message:
+      "Your wallet's DUST proof was rejected (custom error 170). Your 1AM wallet's copy of the Preprod ledger is out of sync. Open the 1AM extension, let it finish syncing, then retry.",
+  },
+  {
+    test: /temporarily banned|banned|transaction.*pool/i,
+    message:
+      "The network temporarily banned an identical repeated transaction. Wait a minute, then try again — the app now re-checks the indexer before each attempt.",
+  },
+  {
     test: /campaign already launched|already launched/i,
     message:
       "An active campaign already exists. Please close the current campaign before launching a new one.",
