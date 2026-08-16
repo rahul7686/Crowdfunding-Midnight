@@ -5,6 +5,14 @@ campaign and donate anonymously — donation amounts are carried only inside
 private witness state and proven with zero-knowledge proofs, never revealed on
 the ledger.
 
+## Live Demo
+
+**[Open the live demo](https://private-crowdfunding-platform.vercel.app/)**
+
+Try the deployed frontend at
+[https://private-crowdfunding-platform.vercel.app/](https://private-crowdfunding-platform.vercel.app/)
+— connect the Midnight 1AM wallet and launch a campaign or make a private donation.
+
 ## How it works
 
 - **One deployed contract hosts many campaigns.** Each campaign has its own
