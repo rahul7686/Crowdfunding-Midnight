@@ -6,7 +6,9 @@
 // Run automatically by `npm run compile`, and again by `npm run frontend:dev` /
 // `npm run frontend:build` (predev/prebuild) so the frontend is never stale.
 //
-// Generated files are gitignored — never commit them (see .gitignore).
+// When contracts/managed is absent (e.g. on Vercel, where the Compact toolchain
+// is not installed), the script falls back to the frontend artifacts that are
+// committed to Git instead of failing the build.
 
 import * as fs from "node:fs";
 import * as path from "node:path";
@@ -22,8 +24,21 @@ const srcJs = path.join(managed, "contract", "index.js");
 const srcDts = path.join(managed, "contract", "index.d.ts");
 
 if (!fs.existsSync(srcJs)) {
+  // No freshly compiled contract (e.g. a Vercel build, which never has the
+  // Compact toolchain). The frontend artifacts committed to Git are already in
+  // place, so there is nothing to sync — just confirm they exist and continue.
+  const feJs = path.join(feContractSrc, "index.js");
+  const feKeys = path.join(feArtifacts, "keys");
+  if (fs.existsSync(feJs) && fs.existsSync(feKeys)) {
+    console.log(
+      "Managed contract not found; using committed frontend artifacts " +
+        "(frontend/src/contracts + frontend/public/contracts).",
+    );
+    process.exit(0);
+  }
   console.error(
-    `Managed contract not found at ${managed}.\n` +
+    `Managed contract not found at ${managed} and no committed frontend ` +
+      "artifacts exist under frontend/src/contracts / frontend/public/contracts.\n" +
       "Run `npm run compile` from the repo root first.",
   );
   process.exit(1);
