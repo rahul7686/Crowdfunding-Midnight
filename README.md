@@ -202,6 +202,10 @@ The suite exercises launch/donate/close lifecycle, privacy invariants (receipts
 never reveal amounts), over-funding rejection, owner-only close, multi-round
 donations and native NIGHT coin minting to recipients.
 
+![Tests passing](./screenshots/tests-passing.png)
+
+The screenshot shows the Vitest suite with **21 tests passing**.
+
 ## CI/CD
 
 GitHub Actions runs validation on every `push` and `pull_request` (see
@@ -237,5 +241,5 @@ limitation, not a bug in the crowdfunding contract.
 ## Security notes
 
 - Never commit `.midnight-state.json` (contains the wallet seed), `.midnight-wallet-state/`, `midnight-level-db/` or any `.env.local`.
-- Generated contract artifacts under `contracts/managed/`, `frontend/src/contracts/` and `frontend/public/contracts/` are gitignored.
+- `contracts/managed/` is generated and gitignored. The frontend copies in `frontend/src/contracts/` and `frontend/public/contracts/` are intentionally committed because the Vercel deployment needs these generated frontend artifacts.
 - The wallet seed printed at setup is the only way to recover funds — back it up securely.
