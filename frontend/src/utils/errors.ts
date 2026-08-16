@@ -14,6 +14,11 @@ const PATTERNS: Array<{ test: RegExp; message: string }> = [
       "The network rejected the transaction's proof (custom error 115). This usually means the indexer was behind or out of sync with the chain when the proof was built. Please try again now — the app waits for the indexer to catch up before submitting.",
   },
   {
+    test: /custom error: 171|dust.*validity|out of dust|dust.*window/i,
+    message:
+      "Your wallet spent a DUST coin outside its validity window (custom error 171). This means the wallet's DUST is stale or its clock is behind the chain. Resync the 1AM wallet (or reload the extension) so it refreshes its DUST, then retry.",
+  },
+  {
     test: /custom error: 170|invalid dust|dust spend/i,
     message:
       "Your wallet's DUST proof was rejected (custom error 170). Your 1AM wallet's copy of the Preprod ledger is out of sync. Open the 1AM extension, let it finish syncing, then retry.",

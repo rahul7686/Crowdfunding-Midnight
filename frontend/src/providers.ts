@@ -254,24 +254,42 @@ function describeImbalances(
   );
 }
 
+// TEMPORARY diagnostics for the Preprod DUST error-170 investigation. Only
+// public/safe fields are logged: wallet addresses, network ids, indexer/node
+// URIs, DUST balance, and chain height. No keys or private state are printed.
+// Remove once the 170 issue is diagnosed.
 async function logBalancingContext(
   api: ConnectedAPI,
   unproven: UnboundTransaction,
 ): Promise<void> {
   try {
-    const [shielded, unshielded, dust] = await Promise.all([
-      api.getShieldedBalances(),
-      api.getUnshieldedBalances(),
-      api.getDustBalance(),
-    ]);
+    const [shielded, unshielded, dust, config, address, tip] =
+      await Promise.all([
+        api.getShieldedBalances(),
+        api.getUnshieldedBalances(),
+        api.getDustBalance(),
+        api.getConfiguration(),
+        api
+          .getUnshieldedAddress()
+          .then((a) => a.unshieldedAddress)
+          .catch(() => null),
+        getNodeTip().catch(() => null),
+      ]);
     const imbalances = describeImbalances(unproven);
     const nativeImbalance = Object.entries(imbalances).find(([label]) =>
       label.startsWith("tNIGHT"),
     );
-    console.debug("[crowdfunding:balanceTx] wallet funds", {
-      shielded: shielded,
-      unshielded: unshielded,
-      dust: dust.balance.toString(),
+    console.debug("[crowdfunding:balanceTx] wallet diagnostics", {
+      at: new Date().toISOString(),
+      networkId: config.networkId,
+      walletIndexer: config.indexerUri,
+      dappIndexer: INDEXER_URL,
+      walletNode: config.substrateNodeUri,
+      nodeHeight: tip?.height ?? null,
+      address: address ? `${address.slice(0, 12)}…` : null,
+      dust: { balance: dust.balance.toString(), cap: dust.cap.toString() },
+      shielded,
+      unshielded,
     });
     console.debug("[crowdfunding:balanceTx] unproven transaction", {
       guaranteedInputs: unproven.guaranteedOffer?.inputs.length ?? 0,
@@ -401,7 +419,26 @@ export async function buildProviders(
     },
     midnightProvider: {
       async submitTx(tx: unknown): Promise<string> {
-        await api.submitTransaction(toHex((tx as { serialize(): Uint8Array }).serialize()));
+        const at = new Date().toISOString();
+        let nodeHeight: number | null = null;
+        try {
+          nodeHeight = (await getNodeTip()).height;
+        } catch {
+          // non-fatal
+        }
+        const serialized = toHex((tx as { serialize(): Uint8Array }).serialize());
+        try {
+          await api.submitTransaction(serialized);
+        } catch (err) {
+          // TEMPORARY diagnostics for the Preprod DUST error-170 investigation.
+          console.error("[crowdfunding:submit] raw submission error", {
+            at,
+            nodeHeight,
+            message: err instanceof Error ? err.message : String(err),
+            raw: err,
+          });
+          throw err;
+        }
         const identifiers = (tx as { identifiers?(): readonly string[] }).identifiers?.();
         return identifiers?.[0] ?? "";
       },
