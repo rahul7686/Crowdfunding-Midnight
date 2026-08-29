@@ -445,3 +445,84 @@ export async function buildProviders(
     },
   };
 }
+
+export interface ConnectedSession {
+  api: ConnectedAPI;
+  config: { networkId: string; indexerUri: string; indexerWsUri: string; substrateNodeUri: string };
+  providers: Providers;
+  unshieldedAddress: string;
+}
+
+export function detectWallet(): Promise<any | null> {
+  return new Promise((resolve) => {
+    let attempts = 0;
+    const check = () => {
+      const wallet = (window as any).midnight?.["1am"];
+      if (wallet) {
+        resolve(wallet);
+        return;
+      }
+      if (++attempts > 50) {
+        resolve(null);
+        return;
+      }
+      setTimeout(check, 100);
+    };
+    check();
+  });
+}
+
+export async function createConnectedSession(api: ConnectedAPI): Promise<ConnectedSession> {
+  const [config, unshieldedAddr, shieldedAddrs] = await Promise.all([
+    api.getConfiguration(),
+    api.getUnshieldedAddress(),
+    api.getShieldedAddresses(),
+  ]);
+
+  // Set Midnight Network ID explicitly before any wallet or contract operation
+  setNetworkId(config.networkId);
+
+  const keys: WalletKeys = {
+    coinPublicKey: shieldedAddrs.shieldedCoinPublicKey,
+    encryptionPublicKey: shieldedAddrs.shieldedEncryptionPublicKey,
+  };
+
+  const providers = await buildProviders(api, keys, unshieldedAddr.unshieldedAddress);
+
+  return {
+    api,
+    config: config as any,
+    providers,
+    unshieldedAddress: unshieldedAddr.unshieldedAddress,
+  };
+}
+
+export async function fetchContractState(queryUrl: string, contractAddress: string): Promise<string | null> {
+  const res = await fetch(queryUrl, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      query: `query($address: HexEncoded!) { contractAction(address: $address) { state } }`,
+      variables: { address: contractAddress },
+    }),
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data?.data?.contractAction?.state ?? null;
+}
+
+export async function pollForState(
+  queryUrl: string,
+  contractAddress: string,
+  onProgress?: (attempt: number) => void,
+  maxAttempts = 120,
+  intervalMs = 2000,
+): Promise<string> {
+  for (let i = 0; i < maxAttempts; i++) {
+    onProgress?.(i + 1);
+    const state = await fetchContractState(queryUrl, contractAddress);
+    if (state) return state;
+    await new Promise((r) => setTimeout(r, intervalMs));
+  }
+  throw new Error(`State not found after ${(maxAttempts * intervalMs) / 1000}s`);
+}

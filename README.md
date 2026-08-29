@@ -115,10 +115,25 @@ base units.
 └── .midnight-state.json                     # LOCAL ONLY — wallet seed + deployments
 ```
 
+## Smart Contract Deployment
+
+### Browser-based 1AM Preprod Deploy
+
+Contract deployment is performed directly in the browser through the **1AM wallet extension** on the **Midnight Preprod** network at the `/deploy` route.
+
+1. Install the **1AM** browser extension and select the **Preprod** network.
+2. Start the frontend application:
+   ```bash
+   npm run frontend:dev
+   ```
+3. Open `http://localhost:5173/deploy` in your browser.
+4. Click **Connect 1AM Wallet** and **Deploy Contract via 1AM Extension**.
+5. Once confirmed on-chain, the deployed contract address will be displayed.
+
 ## Prerequisites
 
 - Node.js >= 22
-- Docker (for the local devnet / proof server)
+- The 1AM browser extension (set to Midnight Preprod)
 - The Midnight `compact` compiler CLI (`npm run compile`)
 
 ## Setup
@@ -126,24 +141,8 @@ base units.
 ```bash
 npm install
 npm run compile          # compile the Compact contract → contracts/managed (+ frontend sync)
-docker compose up -d     # local node, indexer and proof server (for undeployed/devnet)
-npm run setup            # register the genesis wallet (BIP-39 seed persisted locally)
+npm run frontend:dev     # start the DApp at http://localhost:5173/deploy
 ```
-
-> The proof server runs on `127.0.0.1:6300` (see `compose.yml`). On the public
-> Preview network only the proof server is required — the node and indexer are
-> remote.
-
-## Deploy
-
-```bash
-npm run deploy                      # deploy + launch a demo campaign (default 1,000 tNIGHT target)
-npm run deploy -- --target 100      # 100 NIGHT target (6-decimal conversion applied)
-npm run deploy -- --no-launch       # deploy only; launch later from the DApp or CLI
-```
-
-On success the contract address is written to `.midnight-state.json` and the
-frontend variables to `frontend/.env.local` (both gitignored).
 
 ## Use the CLI
 

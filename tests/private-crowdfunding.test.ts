@@ -2,7 +2,7 @@ import { CrowdfundingSimulator, pad } from "./private-crowdfunding-simulator.js"
 import { setNetworkId } from "@midnight-ntwrk/midnight-js-network-id";
 import { describe, it, expect } from "vitest";
 import { randomBytes } from "./utils.js";
-import { CampaignStatus } from "../contracts/managed/private-crowdfunding/contract/index.js";
+import { CampaignStatus } from "../src/contract/index.js";
 import { createCrowdfundingPrivateState, deriveCampaignSecretKey } from "../src/contract/witnesses.js";
 
 setNetworkId("undeployed");

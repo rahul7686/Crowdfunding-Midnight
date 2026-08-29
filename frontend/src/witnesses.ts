@@ -26,6 +26,17 @@ export type CrowdfundingPrivateState = {
   readonly pendingDonation: bigint;
 };
 
+export const deriveCampaignSecretKey = (seed: string): Uint8Array => {
+  const enc = new TextEncoder();
+  const data = enc.encode("crowdfunding:dapp-secret-key:" + seed);
+  // Synchronous fallback or simple bytes derivation for testing
+  const res = new Uint8Array(32);
+  for (let i = 0; i < data.length; i++) {
+    res[i % 32] ^= data[i];
+  }
+  return res;
+};
+
 export const createCrowdfundingPrivateState = (
   secretKey: Uint8Array,
   pendingDonation = 0n,

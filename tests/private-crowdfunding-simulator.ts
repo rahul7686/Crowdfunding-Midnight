@@ -20,7 +20,7 @@ import {
   type Ledger,
   ledger,
   pureCircuits,
-} from "../contracts/managed/private-crowdfunding/contract/index.js";
+} from "../src/contract/index.js";
 import { type CrowdfundingPrivateState, witnesses } from "../src/contract/witnesses.js";
 
 /**

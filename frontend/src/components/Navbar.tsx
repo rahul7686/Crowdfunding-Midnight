@@ -13,17 +13,19 @@ interface NavbarProps {
   networkId: string | null;
   address: string | null;
   onDisconnect: () => void;
+  onNavigate?: (path: string) => void;
+  currentPath?: string;
 }
 
 const NAV_LINKS = [
-  { label: "Dashboard", href: "#home" },
-  { label: "Campaign", href: "#campaign" },
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "Privacy", href: "#privacy" },
-  { label: "About", href: "#about" },
+  { label: "Dashboard", href: "/" },
+  { label: "Deploy (/deploy)", href: "/deploy" },
+  { label: "Campaigns", href: "/#campaign" },
+  { label: "How It Works", href: "/#how-it-works" },
+  { label: "Privacy", href: "/#privacy" },
 ];
 
-export function Navbar({ connected, networkId, address, onDisconnect }: NavbarProps) {
+export function Navbar({ connected, networkId, address, onDisconnect, onNavigate, currentPath }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [connecting, setConnecting] = useState(false);
@@ -35,12 +37,19 @@ export function Navbar({ connected, networkId, address, onDisconnect }: NavbarPr
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Mirror the wallet's connecting state (owned by WalletConnect/useMidnight)
-  // so the button can show progress and avoid double clicks.
+  // Mirror the wallet's connecting state
   useEffect(() => {
     registerConnectingListener(setConnecting);
     return () => unregisterConnectingListener();
   }, []);
+
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    setMenuOpen(false);
+    if (href === "/deploy" || href === "/") {
+      e.preventDefault();
+      onNavigate?.(href);
+    }
+  };
 
   const networkLabel =
     networkId === null || networkId === "" || networkId === "preview"
@@ -50,7 +59,7 @@ export function Navbar({ connected, networkId, address, onDisconnect }: NavbarPr
   return (
     <header className={`navbar ${scrolled ? "navbar-scrolled" : ""}`}>
       <div className="navbar-inner">
-        <a className="brand" href="#home" onClick={() => setMenuOpen(false)}>
+        <a className="brand" href="/" onClick={(e) => handleLinkClick(e, "/")}>
           <span className="brand-mark">
             <LogoShield />
           </span>
@@ -64,9 +73,9 @@ export function Navbar({ connected, networkId, address, onDisconnect }: NavbarPr
           {NAV_LINKS.map((link) => (
             <a
               key={link.label}
-              className="nav-link"
+              className={`nav-link ${currentPath === link.href ? "active" : ""}`}
               href={link.href}
-              onClick={() => setMenuOpen(false)}
+              onClick={(e) => handleLinkClick(e, link.href)}
             >
               {link.label}
             </a>

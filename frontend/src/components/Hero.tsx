@@ -59,7 +59,11 @@ function HeroVisual() {
   );
 }
 
-export function Hero() {
+interface HeroProps {
+  onDeployClick?: () => void;
+}
+
+export function Hero({ onDeployClick }: HeroProps) {
   return (
     <section className="hero" id="home">
       <div className="hero-inner">
@@ -77,9 +81,12 @@ export function Hero() {
             and contribution details private.
           </p>
           <div className="hero-actions">
-            <a className="btn btn-primary btn-lg" href="#campaign">
-              Launch Campaign
-            </a>
+            <button
+              className="btn btn-primary btn-lg"
+              onClick={() => onDeployClick?.()}
+            >
+              Deploy Contract (/deploy)
+            </button>
             <a className="btn btn-ghost btn-lg" href="#campaign">
               Explore Campaigns
               <ArrowRightIcon />

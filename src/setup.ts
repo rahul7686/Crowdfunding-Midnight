@@ -26,9 +26,8 @@ async function main(): Promise<void> {
   // 2. Compile the contract (network-agnostic).
   run("npm", ["run", "compile"]);
 
-  // 3. Deploy. Forward --network so deploy.ts sees the same network.
-  const deployArgs = network === "undeployed" ? [] : ["--", "--network", network];
-  run("npm", ["run", "deploy", ...deployArgs]);
+  process.stdout.write("\n✔ Setup complete! Compile & ZK assets synced.\n");
+  process.stdout.write("→ Open the browser app at http://localhost:5173/deploy to deploy your contract via 1AM extension.\n\n");
 }
 
 main().catch((e) => {
