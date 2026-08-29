@@ -22,10 +22,10 @@ export function Footer() {
           <span className="brand-mark brand-mark-lg">
             <LogoShield />
           </span>
-          <span className="brand-name footer-brand-name">PrivateFund</span>
-          <p className="footer-tagline">Crowdfunding-Midnight powered by Midnight.</p>
+          <span className="brand-name footer-brand-name">Crowdfunding-Midnight</span>
+          <p className="footer-tagline">Private Crowdfunding powered by Midnight Network.</p>
           <p className="footer-about">
-            PrivateFund lets you donate privately and verify impact publicly.
+            Crowdfunding-Midnight lets you donate privately and verify impact publicly.
             Every contribution is proved with a zero-knowledge proof on the
             Midnight Network — identity and amounts are never revealed.
           </p>
@@ -57,7 +57,7 @@ export function Footer() {
 
       <div className="footer-bottom">
         <p>
-          PrivateFund · Crowdfunding-Midnight on the Midnight Network ·{" "}
+          Crowdfunding-Midnight on the Midnight Network ·{" "}
           <code>preprod</code>
         </p>
       </div>

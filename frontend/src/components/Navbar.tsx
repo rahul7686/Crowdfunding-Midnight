@@ -64,8 +64,8 @@ export function Navbar({ connected, networkId, address, onDisconnect, onNavigate
             <LogoShield />
           </span>
           <span className="brand-text">
-            <span className="brand-name">PrivateFund</span>
-            <span className="brand-sub">Crowdfunding-Midnight</span>
+            <span className="brand-name">Crowdfunding-Midnight</span>
+            <span className="brand-sub">Midnight Network</span>
           </span>
         </a>
 
