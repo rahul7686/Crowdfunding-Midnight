@@ -63,8 +63,8 @@ export function WalletDropdown({ address, networkId, onDisconnect }: WalletDropd
   };
 
   const networkLabel =
-    networkId === null || networkId === "" || networkId === "preview"
-      ? "Midnight Preview"
+    networkId === null || networkId === "" || networkId === "preprod"
+      ? "Midnight Preprod"
       : `Midnight ${networkId}`;
 
   return (

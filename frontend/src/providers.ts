@@ -28,13 +28,17 @@ import { fromHex, toHex } from "@midnight-ntwrk/midnight-js-utils";
 
 import { type CrowdfundingPrivateState } from "./witnesses";
 
-export const NETWORK_ID = import.meta.env.VITE_NETWORK ?? "preview";
+export const NETWORK_ID = import.meta.env.VITE_NETWORK ?? "preprod";
 export const INDEXER_URL =
   import.meta.env.VITE_INDEXER_URL ??
-  "https://indexer.preview.midnight.network/api/v4/graphql";
+  (NETWORK_ID === "preview"
+    ? "https://indexer.preview.midnight.network/api/v4/graphql"
+    : "https://indexer.preprod.midnight.network/api/v4/graphql");
 export const INDEXER_WS_URL =
   import.meta.env.VITE_INDEXER_WS_URL ??
-  "wss://indexer.preview.midnight.network/api/v4/graphql/ws";
+  (NETWORK_ID === "preview"
+    ? "wss://indexer.preview.midnight.network/api/v4/graphql/ws"
+    : "wss://indexer.preprod.midnight.network/api/v4/graphql/ws");
 
 export const PRIVATE_STATE_ID = "crowdfundingPrivateState";
 export const PRIVATE_STATE_PASSWORD =
@@ -51,9 +55,9 @@ export const PRIVATE_STATE_PASSWORD =
 // caught up to (and agrees with) the node's canonical chain.
 
 const DEFAULT_NODE_RPC =
-  NETWORK_ID === "preprod"
-    ? "https://rpc.preprod.midnight.network"
-    : "https://rpc.preview.midnight.network";
+  NETWORK_ID === "preview"
+    ? "https://rpc.preview.midnight.network"
+    : "https://rpc.preprod.midnight.network";
 
 export const NODE_RPC_URL = import.meta.env.VITE_NODE_RPC_URL ?? DEFAULT_NODE_RPC;
 

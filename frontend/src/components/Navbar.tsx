@@ -52,8 +52,8 @@ export function Navbar({ connected, networkId, address, onDisconnect, onNavigate
   };
 
   const networkLabel =
-    networkId === null || networkId === "" || networkId === "preview"
-      ? "Midnight Preview"
+    networkId === null || networkId === "" || networkId === "preprod"
+      ? "Midnight Preprod"
       : `Midnight ${networkId}`;
 
   return (

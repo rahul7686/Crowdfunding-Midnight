@@ -51,14 +51,14 @@ export function Footer() {
 
         <div className="footer-col">
           <h4 className="footer-title">Network</h4>
-          <span className="footer-link">Preview</span>
+          <span className="footer-link">Preprod</span>
         </div>
       </div>
 
       <div className="footer-bottom">
         <p>
           PrivateFund · Crowdfunding-Midnight on the Midnight Network ·{" "}
-          <code>preview</code>
+          <code>preprod</code>
         </p>
       </div>
     </footer>
