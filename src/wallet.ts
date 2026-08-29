@@ -1,4 +1,4 @@
-// Wallet construction + sync-state restore for the Private Crowdfunding CLI.
+// Wallet construction + sync-state restore for the Crowdfunding-Midnight CLI.
 //
 // Mirrors network.ts in structure. The on-disk format and pure I/O live in
 // wallet-state.ts; this file glues that format to the wallet SDK.

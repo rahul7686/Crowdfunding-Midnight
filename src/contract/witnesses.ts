@@ -1,5 +1,5 @@
 /**
- * Private state + witnesses for the Private Crowdfunding contract.
+ * Private state + witnesses for the Crowdfunding-Midnight contract.
  *
  * PRIVATE STATE (lives only in the DApp's local private-state store, never on
  * the ledger):

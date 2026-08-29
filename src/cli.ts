@@ -1,5 +1,5 @@
 /**
- * Interactive CLI for the Private Crowdfunding Platform.
+ * Interactive CLI for Crowdfunding-Midnight.
  *
  * Connects to the deployed contract, reads public state via the indexer, and
  * submits circuit calls (launchCampaign / donate / closeCampaign) through the
@@ -116,7 +116,7 @@ async function displayCampaigns(providers: any, address: string) {
 
 async function main() {
   console.log("\n╔══════════════════════════════════════════════════════════════╗");
-  console.log("║           Private Crowdfunding Platform CLI                    ║");
+  console.log("║               Crowdfunding-Midnight CLI                        ║");
   console.log("╚══════════════════════════════════════════════════════════════╝\n");
 
   const rl = createInterface({ input: stdin, output: stdout });

@@ -69,7 +69,7 @@ export function Hero() {
             Midnight Network · Private &amp; Verifiable
           </span>
           <h1 className="hero-title">
-            Private Crowdfunding
+            Crowdfunding-Midnight
             <span className="hero-title-accent">Powered by Zero-Knowledge</span>
           </h1>
           <p className="hero-sub">

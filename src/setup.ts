@@ -18,7 +18,7 @@ async function main(): Promise<void> {
   if (flag) setActiveNetwork(flag);
   const { network, config } = resolveNetwork({ argv });
 
-  process.stdout.write(`\n→ Setting up Private Crowdfunding Platform on network: ${network}\n\n`);
+  process.stdout.write(`\n→ Setting up Crowdfunding-Midnight on network: ${network}\n\n`);
 
   // 1. Bring up only the services this network needs.
   run("docker", ["compose", "up", "-d", "--wait", ...config.composeServices]);

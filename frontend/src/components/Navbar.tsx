@@ -56,7 +56,7 @@ export function Navbar({ connected, networkId, address, onDisconnect }: NavbarPr
           </span>
           <span className="brand-text">
             <span className="brand-name">PrivateFund</span>
-            <span className="brand-sub">Private Crowdfunding</span>
+            <span className="brand-sub">Crowdfunding-Midnight</span>
           </span>
         </a>
 

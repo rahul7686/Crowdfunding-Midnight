@@ -1,5 +1,5 @@
 /**
- * Headless simulator for the Private Crowdfunding contract — the same circuit
+ * Headless simulator for the Crowdfunding-Midnight contract — the same circuit
  * runtime the proof backend uses, without needing Docker or a network. This is
  * the primary testbed for circuit logic and state transitions.
  *

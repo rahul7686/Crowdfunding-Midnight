@@ -1,16 +1,16 @@
-# Private Crowdfunding Platform
+# Crowdfunding-Midnight
 
-A private crowdfunding platform on the **Midnight Network**. Anyone can launch a
+Crowdfunding-Midnight is a private crowdfunding platform on the **Midnight Network**. Anyone can launch a
 campaign and donate anonymously — donation amounts are carried only inside
 private witness state and proven with zero-knowledge proofs, never revealed on
 the ledger.
 
 ## Live Demo
 
-**[Open the live demo](https://private-crowdfunding-platform.vercel.app/)**
+**[Open the live demo](https://crowdfunding-midnight.vercel.app/)**
 
 Try the deployed frontend at
-[https://private-crowdfunding-platform.vercel.app/](https://private-crowdfunding-platform.vercel.app/)
+[https://crowdfunding-midnight.vercel.app/](https://crowdfunding-midnight.vercel.app/)
 — connect the Midnight 1AM wallet and launch a campaign or make a private donation.
 
 ## How it works

@@ -1,12 +1,12 @@
-# Local Midnight devnet for the Private Crowdfunding Platform
+# Local Midnight devnet for Crowdfunding-Midnight
 # LOCAL DEVELOPMENT ONLY — do not expose these ports to a public network.
 # Tear down with: docker compose down -v
-name: private-crowdfunding-devnet
+name: crowdfunding-midnight-devnet
 
 services:
   node:
     image: midnightntwrk/midnight-node:1.0.0
-    container_name: private-crowdfunding-node
+    container_name: crowdfunding-midnight-node
     ports:
       - "9944:9944"
     environment:
@@ -25,7 +25,7 @@ services:
 
   indexer:
     image: midnightntwrk/indexer-standalone:4.3.3
-    container_name: private-crowdfunding-indexer
+    container_name: crowdfunding-midnight-indexer
     restart: on-failure
     ports:
       - "8088:8088"
@@ -50,8 +50,8 @@ services:
         condition: service_healthy
 
   proof-server:
-    image: midnightntwrk/proof-server:8.1.0
-    container_name: private-crowdfunding-proof-server
+    image: midnightntwrk/proof-server:1.0.0
+    container_name: crowdfunding-midnight-proof-server
     command: ["midnight-proof-server -v"]
     ports:
       - "6300:6300"

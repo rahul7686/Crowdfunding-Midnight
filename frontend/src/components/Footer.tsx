@@ -1,18 +1,17 @@
 import { LogoShield } from "./icons";
 
-const LINKS = [
+const LINKS: Array<{ label: string; href: string }> = [
   { label: "Home", href: "#home" },
-  { label: "Explore", href: "#campaign" },
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "Privacy", href: "#privacy" },
+  { label: "Campaigns", href: "#campaign" },
   { label: "About", href: "#about" },
 ];
 
 const TECHNOLOGY = [
   "Midnight Network",
-  "Compact",
+  "Compact Smart Contracts",
   "Zero-Knowledge Proofs",
-  "Private Crowdfunding",
+  "React + Vite",
+  "Crowdfunding-Midnight",
 ];
 
 export function Footer() {
@@ -24,7 +23,7 @@ export function Footer() {
             <LogoShield />
           </span>
           <span className="brand-name footer-brand-name">PrivateFund</span>
-          <p className="footer-tagline">Private crowdfunding powered by Midnight.</p>
+          <p className="footer-tagline">Crowdfunding-Midnight powered by Midnight.</p>
           <p className="footer-about">
             PrivateFund lets you donate privately and verify impact publicly.
             Every contribution is proved with a zero-knowledge proof on the
@@ -58,7 +57,7 @@ export function Footer() {
 
       <div className="footer-bottom">
         <p>
-          PrivateFund · Private crowdfunding on the Midnight Network ·{" "}
+          PrivateFund · Crowdfunding-Midnight on the Midnight Network ·{" "}
           <code>preview</code>
         </p>
       </div>

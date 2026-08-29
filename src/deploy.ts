@@ -1,5 +1,5 @@
 /**
- * Deploy the Private Crowdfunding contract to a Midnight network
+ * Deploy the Crowdfunding-Midnight contract to a Midnight network
  * (undeployed by default; use --network preview|preprod for public networks).
  *
  * Flow:
@@ -182,7 +182,7 @@ async function main() {
   const { title, description, target, noLaunch } = parseCampaignArgs(process.argv);
 
   console.log("\n╔══════════════════════════════════════════════════════════════╗");
-  console.log(`║  Deploy Private Crowdfunding to ${network}`);
+  console.log(`║  Deploy Crowdfunding-Midnight to ${network}`);
   console.log("╚══════════════════════════════════════════════════════════════╝\n");
 
   console.log("─── Wallet setup ───────────────────────────────────────────────\n");

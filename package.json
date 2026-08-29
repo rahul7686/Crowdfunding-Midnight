@@ -1,8 +1,8 @@
 {
-  "name": "private-crowdfunding-platform",
+  "name": "crowdfunding-midnight",
   "version": "1.0.0",
   "type": "module",
-  "description": "A private crowdfunding platform on the Midnight Network - launch campaigns and donate anonymously with zero-knowledge proofs.",
+  "description": "Crowdfunding-Midnight - a private crowdfunding platform on the Midnight Network - launch campaigns and donate anonymously with zero-knowledge proofs.",
   "author": "",
   "license": "MIT",
   "private": true,

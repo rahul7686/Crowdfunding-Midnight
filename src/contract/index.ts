@@ -1,5 +1,5 @@
 /**
- * Bundles the compiled Private Crowdfunding contract with its witnesses,
+ * Bundles the compiled Crowdfunding-Midnight contract with its witnesses,
  * exposing a single `CompiledContract` for deploy / join / call flows.
  */
 

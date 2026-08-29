@@ -20,7 +20,7 @@ const RECIPIENT_ALPHA = pad(32, "recipient-alpha");
 const RECIPIENT_BETA = pad(32, "recipient-beta");
 const NATIVE_COLOR = new Uint8Array(32);
 
-describe("Private Crowdfunding smart contract", () => {
+describe("Crowdfunding-Midnight smart contract", () => {
   it("derives a stable 32-byte campaign secret key from the wallet seed", () => {
     const seed = "0a".repeat(32); // 32 bytes of hex seed
     const key1 = deriveCampaignSecretKey(seed);
