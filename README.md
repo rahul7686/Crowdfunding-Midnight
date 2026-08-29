@@ -61,15 +61,13 @@ The DApp is deployed to the **Midnight Preprod** network (set via
 | Field | Value |
 | --- | --- |
 | Network | Preprod |
-| Contract address | `af62db5df9d90739650768e7145396aff0f0945b0a7fbbff5901b81abc0b7a19` |
-| Deployed on | August 9, 2026 |
-| Explorer | [view on the Midnight explorer](https://explorer.midnight.network/contracts/af62db5df9d90739650768e7145396aff0f0945b0a7fbbff5901b81abc0b7a19) |
+| Contract address | `6fbcccaf440785c5f10b278cb0051cfd3c59a4f3af8d6e190ef96a68a5070240` |
+| Deployed on | August 30, 2026 |
+| Explorer | [view on the Midnight explorer](https://explorer.midnight.network/contracts/6fbcccaf440785c5f10b278cb0051cfd3c59a4f3af8d6e190ef96a68a5070240) |
 
-This is the address configured in `frontend/.env.local`
-(`VITE_CONTRACT_ADDRESS=af62db5df9d90739650768e7145396aff0f0945b0a7fbbff5901b81abc0b7a19`)
-and recorded in `.midnight-state.json` under `deployments.preprod`. The browser
-DApp connects to this exact instance via `findDeployedContract` and submits the
-`launchCampaign` / `donate` / `closeCampaign` circuit calls against it.
+This is the address configured in `frontend/.env.example`
+(`VITE_CONTRACT_ADDRESS=6fbcccaf440785c5f10b278cb0051cfd3c59a4f3af8d6e190ef96a68a5070240`). The browser
+DApp connects to this instance and submits the `launchCampaign` / `donate` / `closeCampaign` circuit calls against it.
 
 ### Deployment screenshot
 

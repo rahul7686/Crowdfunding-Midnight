@@ -46,7 +46,11 @@ import { RocketIcon, UserIcon } from "./icons";
 import { TransactionReceipt, type TxReceiptData } from "./TransactionReceipt";
 import { pureCircuits } from "../contracts/index.js";
 
-const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS ?? "";
+const DEFAULT_CONTRACT_ADDRESS = "6fbcccaf440785c5f10b278cb0051cfd3c59a4f3af8d6e190ef96a68a5070240";
+const CONTRACT_ADDRESS =
+  (typeof window !== "undefined" && localStorage.getItem("crowdfunding_contract_address")) ||
+  import.meta.env.VITE_CONTRACT_ADDRESS ||
+  DEFAULT_CONTRACT_ADDRESS;
 const POLL_MS = 8_000;
 
 // The salt the contract uses to derive the owner pseudonym:
