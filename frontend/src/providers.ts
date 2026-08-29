@@ -17,6 +17,8 @@
  */
 
 import { type ConnectedAPI } from "@midnight-ntwrk/dapp-connector-api";
+import { ContractState } from "@midnight-ntwrk/compact-runtime";
+import { LedgerParameters, ZswapChainState } from "@midnight-ntwrk/ledger-v8";
 import { dappConnectorProofProvider } from "@midnight-ntwrk/midnight-js-dapp-connector-proof-provider";
 import { FetchZkConfigProvider } from "@midnight-ntwrk/midnight-js-fetch-zk-config-provider";
 import { indexerPublicDataProvider } from "@midnight-ntwrk/midnight-js-indexer-public-data-provider";
@@ -362,26 +364,70 @@ async function rewordInsufficientFunds(
   }
 }
 
+export function createPatchedPublicDataProvider(queryUrl: string, subscriptionUrl: string) {
+  const base = indexerPublicDataProvider(queryUrl, subscriptionUrl);
+
+  async function queryLatest(query: string, address: string) {
+    const res = await fetch(queryUrl, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ query, variables: { address } }),
+    });
+    if (!res.ok) throw new Error(`Indexer HTTP error: ${res.status}`);
+    const payload = await res.json();
+    if (payload.errors?.length) throw new Error(payload.errors.map((e: any) => e.message).join("; "));
+    return payload.data?.contractAction ?? null;
+  }
+
+  return {
+    ...base,
+    async queryContractState(contractAddress: string, config?: any) {
+      if (config) return base.queryContractState(contractAddress, config);
+      const action = await queryLatest(`
+        query LATEST_CONTRACT_STATE($address: HexEncoded!) {
+          contractAction(address: $address) { state }
+        }`, contractAddress);
+      return action ? ContractState.deserialize(fromHex(action.state)) : null;
+    },
+    async queryZSwapAndContractState(contractAddress: string, config?: any) {
+      if (config) return base.queryZSwapAndContractState(contractAddress, config);
+      const action = await queryLatest(`
+        query LATEST_BOTH_STATE($address: HexEncoded!) {
+          contractAction(address: $address) {
+            state
+            zswapState
+            transaction { block { ledgerParameters } }
+          }
+        }`, contractAddress);
+      if (!action?.zswapState) return null;
+      return [
+        ZswapChainState.deserialize(fromHex(action.zswapState)),
+        ContractState.deserialize(fromHex(action.state)),
+        action.transaction?.block?.ledgerParameters
+          ? LedgerParameters.deserialize(fromHex(action.transaction.block.ledgerParameters))
+          : LedgerParameters.initialParameters(),
+      ] as const;
+    },
+  };
+}
+
 export async function buildProviders(
   api: ConnectedAPI,
   keys: WalletKeys,
   accountId: string,
 ): Promise<Providers> {
-  setNetworkId(NETWORK_ID);
+  const config = await api.getConfiguration().catch(() => null);
+  const activeNetworkId = config?.networkId ?? NETWORK_ID;
+  setNetworkId(activeNetworkId);
 
-  // The SDK calls `this.fetchFunc(...)`, i.e. as a method. When fetchFunc is
-  // the raw `window.fetch` (what cross-fetch re-exports), Chrome throws
-  // "Failed to execute 'fetch' on 'Window': Illegal invocation" because `this`
-  // is the provider instead of the Window. Binding to `window` fixes it.
+  const queryUrl = config?.indexerUri || INDEXER_URL;
+  const subUrl = config?.indexerWsUri || INDEXER_WS_URL;
+
   const zkConfigProvider = new FetchZkConfigProvider<CircuitKeys>(
     `${window.location.origin}/contracts`,
     (input, init) => window.fetch(input, init),
   );
 
-  // Proving is delegated to the wallet. The wallet pulls the prover keys from
-  // the zkConfigProvider and generates the zero-knowledge proof locally (or via
-  // the proof server the wallet user has configured). The DApp never sees the
-  // witness values — they only ever live inside the circuit preimage.
   const proofProvider = await dappConnectorProofProvider(
     api,
     zkConfigProvider,
@@ -390,13 +436,7 @@ export async function buildProviders(
 
   return {
     privateStateProvider: makePrivateStateProvider(accountId),
-    publicDataProvider: indexerPublicDataProvider(
-      INDEXER_URL,
-      INDEXER_WS_URL,
-      // The provider's type is the Node `ws` implementation; in the browser we
-      // pass the native one, which graphql-ws accepts at runtime.
-      WebSocket as never,
-    ),
+    publicDataProvider: createPatchedPublicDataProvider(queryUrl, subUrl) as any,
     zkConfigProvider,
     proofProvider,
     walletProvider: {
