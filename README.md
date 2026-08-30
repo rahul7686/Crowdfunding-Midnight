@@ -178,7 +178,7 @@ links the confirmed transaction in the Midnight explorer.
 
 ## Demo video
 
-[Watch the demo video on YouTube](https://youtu.be/uaJt2fKiHKU)
+[Watch video on Drive](https://drive.google.com/file/d/18nknwatvn2uyioW-ojDnNGsOYNR-K1wG/view?usp=sharing)
 
 The video shows:
 
