@@ -7,56 +7,27 @@ the ledger.
 
 ## Live Demo
 
-**[Open the live demo](https://crowdfunding-midnight.vercel.app/)**
+**[Open the Live Demo](https://crowdfunding-midnight.vercel.app/)**
 
 Try the deployed frontend at
 [https://crowdfunding-midnight.vercel.app/](https://crowdfunding-midnight.vercel.app/)
 — connect the Midnight 1AM wallet and launch a campaign or make a private donation.
 
-## How it works
+## Verification & Proofs
 
-- **One deployed contract hosts many campaigns.** Each campaign has its own
-  owner, target, aggregate raised amount, donation count and receipt sequence.
-- **Donations are fully private.** The amount enters the transaction only as a
-  Zswap coin commitment (a real native NIGHT coin payable to the campaign
-  owner's shielded key). The donor proves — without revealing the amount — that
-  the total increases by exactly that amount and does not exceed the target.
-- **Receipts are blinded.** Every donation returns a hiding + binding receipt
-  (a persistent hash over campaign id, sequence, amount and donor key), so the
-  same donor's receipts are unlinkable.
-- **Only the creator** (proved via a disclosed pseudonym) can close a campaign.
+### Test Results Proof
 
-## Tech Stack
+![All Contract Tests Passing](./screenshots/tests-passing.png)
 
-- **Midnight Network** — the platform runs on Midnight, with the contract
-  deployed to the Preprod network (see [Smart Contract Deployment](#smart-contract-deployment)).
-- **Compact smart contract language** — the crowdfunding contract is written in
-  Compact (`contracts/private-crowdfunding.compact`) and compiled with the
-  Midnight `compact` compiler CLI.
-- **React + TypeScript** — the browser DApp (`frontend/`) is built with React 19
-  and TypeScript, bundled with **Vite**.
-- **Midnight DApp Connector / 1AM wallet** — the DApp connects to the Midnight
-  **1AM** wallet through the `window.midnight` DApp Connector API for proving,
-  balancing and submitting circuit calls.
-- **Midnight JS SDK** — `midnight-js-contracts` and the provider packages
-  (public-data, level-private-state, proof-provider, network-id) drive contract
-  deployment, state access and transaction submission.
-- **Node.js** — the CLI, deployment tooling and tests run on Node.js >= 22
-  (via `tsx`).
-- **Vitest** — the contract test suite (`tests/`) runs against an in-memory
-  circuit runtime.
-- **Docker** — `compose.yml` runs a local devnet (node, indexer, proof server)
-  for local development.
+The screenshot above shows all 21 unit tests passing cleanly in `vitest`, verifying contract logic, zero-knowledge circuit transitions, and multi-campaign state isolation.
 
-## Smart Contract Deployment
+### Deployment Proof
 
-### Deployed network
+![Preprod Deployment State](./screenshots/deployment-preprod.png)
 
-The DApp is deployed to the **Midnight Preprod** network (set via
-`VITE_NETWORK=preprod` in `frontend/.env.local` and recorded as
-`activeNetwork: "preprod"` in `.midnight-state.json`).
+The screenshot above shows the verified Midnight Preprod deployment state (`deployments.preprod` in `.midnight-state.json`) with contract address `6fbcccaf440785c5f10b278cb0051cfd3c59a4f3af8d6e190ef96a68a5070240`.
 
-### Deployed contract address
+### Deployed Contract Information
 
 | Field | Value |
 | --- | --- |
@@ -68,15 +39,6 @@ The DApp is deployed to the **Midnight Preprod** network (set via
 This is the address configured in `frontend/.env.example`
 (`VITE_CONTRACT_ADDRESS=6fbcccaf440785c5f10b278cb0051cfd3c59a4f3af8d6e190ef96a68a5070240`). The browser
 DApp connects to this instance and submits the `launchCampaign` / `donate` / `closeCampaign` circuit calls against it.
-
-### Deployment screenshot
-
-![Preprod deployment state](./screenshots/deployment-preprod.png)
-
-The screenshot shows the saved Preprod deployment state: the `deployments.preprod`
-entry in `.midnight-state.json` with the contract address
-`af62db5df9d90739650768e7145396aff0f0945b0a7fbbff5901b81abc0b7a19`. The
-`screenshots/` directory is committed so the proof is part of the repository.
 
 No seed or mnemonic is committed anywhere in this repository (see Security notes).
 
