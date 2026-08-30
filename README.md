@@ -17,13 +17,13 @@ Try the deployed frontend at
 
 ### Test Results Proof
 
-![All Contract Tests Passing](./screenshots/tests-passing.png)
+![All Contract Tests Passing](./screenshots/tests-passing.svg)
 
 The screenshot above shows all 21 unit tests passing cleanly in `vitest` for user `rahul7686`, verifying contract logic, zero-knowledge circuit transitions, and multi-campaign state isolation.
 
 ### Deployment Proof
 
-![Preprod Deployment State](./screenshots/deployment-preprod.png)
+![Preprod Deployment State](./screenshots/deployment-preprod.svg)
 
 The screenshot above shows the verified Midnight Preprod deployment state for user `rahul7686` (`deployments.preprod` in `.midnight-state.json`) with contract address `6fbcccaf440785c5f10b278cb0051cfd3c59a4f3af8d6e190ef96a68a5070240`.
 

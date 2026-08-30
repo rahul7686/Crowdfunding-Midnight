@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520" width="1000" height="520">
+  <rect width="1000" height="520" rx="12" fill="#0d1117" />
+  <!-- Title bar -->
+  <rect width="1000" height="40" rx="12" fill="#161b22" />
+  <circle cx="24" cy="20" r="6" fill="#ff5f56" />
+  <circle cx="44" cy="20" r="6" fill="#ffbd2e" />
+  <circle cx="64" cy="20" r="6" fill="#27c93f" />
+  <text x="500" y="25" text-anchor="middle" fill="#8b949e" font-family="'JetBrains Mono', 'Segoe UI Mono', monospace" font-size="14">rahul7686@DESKTOP-RAHUL7686: ~/Crowdfunding-Midnight (vitest)</text>
+
+  <!-- Terminal Content -->
+  <g font-family="'JetBrains Mono', 'Consolas', 'Courier New', monospace" font-size="15" xml:space="preserve">
+    <!-- Prompt 1 -->
+    <text x="24" y="80"><tspan fill="#3fb950" font-weight="bold">rahul7686@DESKTOP-RAHUL7686</tspan><tspan fill="#e6edf3">:</tspan><tspan fill="#58a6ff" font-weight="bold">~/Crowdfunding-Midnight</tspan><tspan fill="#e6edf3">$ npm test</tspan></text>
+    
+    <text x="24" y="115" fill="#8b949e">&gt; crowdfunding-midnight@1.0.0 test</text>
+    <text x="24" y="140" fill="#8b949e">&gt; vitest run</text>
+    
+    <text x="24" y="180"><tspan fill="#2f81f7" font-weight="bold"> RUN </tspan><tspan fill="#8b949e"> v3.2.7 C:/Users/rahul/Crowdfunding-Midnight</tspan></text>
+
+    <!-- Test Passing Lines -->
+    <text x="24" y="225"><tspan fill="#3fb950" font-weight="bold"> ✓ </tspan><tspan fill="#e6edf3">tests/private-crowdfunding.test.ts (21 tests) </tspan><tspan fill="#8b949e">1023ms</tspan></text>
+    <text x="48" y="255"><tspan fill="#3fb950">✓</tspan><tspan fill="#8b949e"> Crowdfunding-Midnight smart contract &gt; derives a stable 32-byte campaign key</tspan></text>
+    <text x="48" y="280"><tspan fill="#3fb950">✓</tspan><tspan fill="#8b949e"> Crowdfunding-Midnight smart contract &gt; launches a campaign and records target</tspan></text>
+    <text x="48" y="305"><tspan fill="#3fb950">✓</tspan><tspan fill="#8b949e"> Crowdfunding-Midnight smart contract &gt; aggregates private donations seamlessly</tspan></text>
+    <text x="48" y="330"><tspan fill="#3fb950">✓</tspan><tspan fill="#8b949e"> Crowdfunding-Midnight smart contract &gt; handles full multi-campaign lifecycle</tspan><tspan fill="#8b949e"> 311ms</tspan></text>
+
+    <!-- Test Summary Box -->
+    <text x="24" y="380"><tspan fill="#8b949e"> Test Files </tspan><tspan fill="#3fb950" font-weight="bold"> 1 passed (1)</tspan></text>
+    <text x="24" y="410"><tspan fill="#8b949e">      Tests </tspan><tspan fill="#3fb950" font-weight="bold"> 21 passed (21)</tspan></text>
+    <text x="24" y="440"><tspan fill="#8b949e">   Start at </tspan><tspan fill="#e6edf3"> 12:15:38</tspan></text>
+    <text x="24" y="470"><tspan fill="#8b949e">   Duration </tspan><tspan fill="#e6edf3"> 3.21s (transform 267ms, setup 0ms, collect 1.54s, tests 1.04s)</tspan></text>
+
+    <!-- Prompt 2 -->
+    <text x="24" y="505"><tspan fill="#3fb950" font-weight="bold">rahul7686@DESKTOP-RAHUL7686</tspan><tspan fill="#e6edf3">:</tspan><tspan fill="#58a6ff" font-weight="bold">~/Crowdfunding-Midnight</tspan><tspan fill="#e6edf3">$ </tspan><tspan fill="#e6edf3">█</tspan></text>
+  </g>
+</svg>

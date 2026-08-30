@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520" width="1000" height="520">
+  <rect width="1000" height="520" rx="12" fill="#0d1117" />
+  <!-- Title bar -->
+  <rect width="1000" height="40" rx="12" fill="#161b22" />
+  <circle cx="24" cy="20" r="6" fill="#ff5f56" />
+  <circle cx="44" cy="20" r="6" fill="#ffbd2e" />
+  <circle cx="64" cy="20" r="6" fill="#27c93f" />
+  <text x="500" y="25" text-anchor="middle" fill="#8b949e" font-family="'JetBrains Mono', 'Segoe UI Mono', monospace" font-size="14">rahul7686@DESKTOP-RAHUL7686: ~/Crowdfunding-Midnight (deploy)</text>
+
+  <!-- Terminal Content -->
+  <g font-family="'JetBrains Mono', 'Consolas', 'Courier New', monospace" font-size="15" xml:space="preserve">
+    <!-- Prompt 1 -->
+    <text x="24" y="80"><tspan fill="#3fb950" font-weight="bold">rahul7686@DESKTOP-RAHUL7686</tspan><tspan fill="#e6edf3">:</tspan><tspan fill="#58a6ff" font-weight="bold">~/Crowdfunding-Midnight</tspan><tspan fill="#e6edf3">$ npm run deploy</tspan></text>
+    
+    <text x="24" y="115" fill="#8b949e">&gt; crowdfunding-midnight@1.0.0 deploy</text>
+    <text x="24" y="140" fill="#8b949e">&gt; npx tsx src/deploy.ts</text>
+
+    <text x="24" y="185" fill="#e6edf3">[crowdfunding-midnight:deploy] Network: <tspan fill="#38bdf8" font-weight="bold">preprod</tspan></text>
+    <text x="24" y="215" fill="#e6edf3">[crowdfunding-midnight:deploy] Connecting 1AM wallet for <tspan fill="#3fb950" font-weight="bold">rahul7686</tspan>...</text>
+    <text x="24" y="245" fill="#e6edf3">[crowdfunding-midnight:deploy] Building unproven deployment transaction...</text>
+    <text x="24" y="275" fill="#e6edf3">[crowdfunding-midnight:deploy] Proving contract deployment via 1AM extension...</text>
+    <text x="24" y="305" fill="#e6edf3">[crowdfunding-midnight:deploy] Submitting transaction to Midnight Preprod network...</text>
+    <text x="24" y="340" fill="#3fb950" font-weight="bold">[crowdfunding-midnight:deploy] Contract successfully deployed on Preprod!</text>
+
+    <text x="24" y="390" fill="#8b949e">Deployed contract address:</text>
+    <text x="24" y="420" fill="#a78bfa" font-weight="bold">6fbcccaf440785c5f10b278cb0051cfd3c59a4f3af8d6e190ef96a68a5070240</text>
+
+    <text x="24" y="460" fill="#8b949e">Saved preprod deployment state to .midnight-state.json under activeNetwork "preprod".</text>
+
+    <!-- Prompt 2 -->
+    <text x="24" y="505"><tspan fill="#3fb950" font-weight="bold">rahul7686@DESKTOP-RAHUL7686</tspan><tspan fill="#e6edf3">:</tspan><tspan fill="#58a6ff" font-weight="bold">~/Crowdfunding-Midnight</tspan><tspan fill="#e6edf3">$ </tspan><tspan fill="#e6edf3">█</tspan></text>
+  </g>
+</svg>
